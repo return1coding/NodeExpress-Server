@@ -8,6 +8,8 @@ firebase-debug.log*
 firebase-debug.*.log*
 whoCame.log
 firebase.js
+privkey.pem
+fullchain.pem
 
 # Firebase cache
 .firebase/
