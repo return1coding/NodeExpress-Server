@@ -8,6 +8,14 @@ const app = express();
 const rateLimit = require("express-rate-limit");
 const { db } = require('./firebase');
 const fetch = require('node-fetch');
+const bodyParser = require("body-parser");
+
+//imports for MongoDB and Humanity's TODO
+const mongoose = require('mongoose');
+const Todo = require('./toDoSchema');
+const { dbURI } = require('./dbURI');
+
+
 
 async function callMe(ipString) {
   return fetch(`http://ip-api.com/json/${ipString}`)
@@ -73,6 +81,13 @@ function gimmeSomeTime() {
 }
 
 app.use(cors());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then((result) => console.log("Connected to MongoDB for Humanity's TODO"))
+  .catch((err) => console.log(err));
+
 
 // create a route for /projects
 app.get('/projects', projectLimiter, async (req, res) => {
@@ -83,7 +98,7 @@ app.get('/projects', projectLimiter, async (req, res) => {
       .then((data) => {
         console.log(data)
         activityString =
-`
+          `
 -----------${gimmeSomeTime()}-----------
 Response sent to ${req.ip}
 Details of visitor:
@@ -109,7 +124,7 @@ app.get('/workexperiences', workLimiter, async (req, res) => {
       .then((data) => {
         console.log(data)
         activityString =
-`
+          `
 -----------${gimmeSomeTime()}-----------
 Response sent to ${req.ip}
 Details of visitor:
@@ -122,6 +137,33 @@ ${data.city}
       });
   })
 });
+
+//create routes for MongoDB and Humanity's TODO
+app.post('/submit-todo', (req, res) => {
+  var submitTitle = req.body.title;
+  const myString = callMe(req.ip)
+    .then((data) => {
+      const rawDate = new Date();
+      const submitDateString = `${rawDate.getUTCDate()}/${rawDate.getUTCMonth() + 1}/${rawDate.getUTCFullYear()}`
+      const todo = new Todo({
+        title: submitTitle,
+        from: data.country,
+        time: submitDateString
+      });
+      todo.save();
+    });
+
+})
+
+app.get('/get-all-todos', (req, res) => {
+  Todo.find().sort({ createdAt: -1 })
+    .then((result) => {
+      res.send(result)
+    })
+    .catch((err) => {
+      console.log(err);
+    })
+})
 
 
 // Listen both http & https ports

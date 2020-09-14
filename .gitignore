@@ -10,6 +10,7 @@ whoCame.log
 firebase.js
 privkey.pem
 fullchain.pem
+dbURI.js
 
 # Firebase cache
 .firebase/
