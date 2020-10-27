@@ -115,6 +115,11 @@ ${data.city}
 
 });
 
+app.get('/potato', projectLimiter,  (req, res) => {
+  console.log(req);
+  res.send("potato!!!");
+});
+
 // create a route for /workexperiences
 app.get('/workexperiences', workLimiter, async (req, res) => {
   clearWorkData();
