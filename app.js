@@ -53,6 +53,16 @@ const workLimiter = rateLimit({
   }
 });
 
+//rate limiter for get-todo
+const todoLimiter = rateLimit({
+  windowMs: 10 * 1000,
+  max: 5,
+  message: {
+    status: "declined to get-todos",
+    reason: "too many requests"
+  }
+});
+
 //get data from firebase collection passed in as string
 async function getData(collectionName) {
   var listToReturn = [];
@@ -116,10 +126,6 @@ ${data.city}
 
 });
 
-app.get('/potato', projectLimiter,  (req, res) => {
-  res.send("potato!!!");
-});
-
 // create a route for /workexperiences
 app.get('/workexperiences', workLimiter, async (req, res) => {
   clearWorkData();
@@ -160,7 +166,7 @@ app.post('/submit-todo', (req, res) => {
 
 })
 
-app.get('/get-all-todos', (req, res) => {
+app.get('/get-all-todos', todoLimiter, (req, res) => {
   Todo.find().sort({ createdAt: -1 })
     .then((result) => {
       res.send({result})
