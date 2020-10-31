@@ -84,14 +84,15 @@ app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// mongoose.connect(dbURI, { useNewUrlParser: true, useUnifiedTopology: true })
-//   .then((result) => console.log("Connected to MongoDB for Humanity's TODO"))
-//   .catch((err) => console.log(err));
+mongoose.connect("mongodb+srv://humanitytodo:uJ2PRBW5JckjoxwM@cluster0.ec2ig.gcp.mongodb.net/humanity-todo?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true })
+  .then((result) => console.log("Connected to MongoDB for Humanity's TODO"))
+  .catch((err) => console.log(err));
 
 
 // create a route for /projects
 app.get('/projects', projectLimiter, async (req, res) => {
   clearProjectData();
+  console.log("project data cleared")
   await getData("Projects").then((returnedList) => {
     res.send(returnedList);
     const myString = callMe(req.ip)
@@ -116,7 +117,6 @@ ${data.city}
 });
 
 app.get('/potato', projectLimiter,  (req, res) => {
-  console.log(req);
   res.send("potato!!!");
 });
 
@@ -163,7 +163,7 @@ app.post('/submit-todo', (req, res) => {
 app.get('/get-all-todos', (req, res) => {
   Todo.find().sort({ createdAt: -1 })
     .then((result) => {
-      res.send(result)
+      res.send({result})
     })
     .catch((err) => {
       console.log(err);
@@ -173,15 +173,15 @@ app.get('/get-all-todos', (req, res) => {
 
 // Listen both http & https ports
 const httpServer = http.createServer(app);
-// const httpsServer = https.createServer({
-//   key: fs.readFileSync('/etc/letsencrypt/live/justinevm.ddns.net/privkey.pem'),
-//   cert: fs.readFileSync('/etc/letsencrypt/live/justinevm.ddns.net/fullchain.pem'),
-// }, app);
+const httpsServer = https.createServer({
+  key: fs.readFileSync('/etc/letsencrypt/live/justinevm.ddns.net/privkey.pem'),
+  cert: fs.readFileSync('/etc/letsencrypt/live/justinevm.ddns.net/fullchain.pem'),
+}, app);
 
 httpServer.listen(80, () => {
   console.log('HTTP Server running on port 80');
 });
 
-// httpsServer.listen(443, () => {
-//   console.log('HTTPS Server running on port 443');
-// });
+httpsServer.listen(443, () => {
+  console.log('HTTPS Server running on port 443');
+});
