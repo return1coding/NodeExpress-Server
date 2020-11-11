@@ -162,6 +162,7 @@ app.post('/submit-todo', (req, res) => {
         time: submitDateString
       });
       todo.save();
+      res.send("Got it")
     });
 
 })
